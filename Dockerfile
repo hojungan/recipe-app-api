@@ -8,6 +8,7 @@ ENV PYTHONUNBUFFERED 1
 
 # copy requirements.txt from local to /tmp/requirements.txt in docker image
 COPY ./requirements.txt /tmp/requirements.txt
+COPY ./requirements.dev.txt /tmp/requirements.dev.txt
 
 # /app is the directory containing the django app
 COPY ./app /app
@@ -17,6 +18,8 @@ WORKDIR /app
 
 # expose port from container to machine when container is ran
 EXPOSE 8000
+
+ARG DEV=false
 
 # runs a command on the alpine image used to build image
 # running below commands in multiple RUN will create new image layer for every single command
@@ -33,6 +36,9 @@ EXPOSE 8000
 RUN python -m venv /py && \
   /py/bin/pip install --upgrade pip && \
   /py/bin/pip install -r /tmp/requirements.txt && \
+  if [ $DEV = "true" ]; \
+  then /py/bin/pip install -r /tmp/requirements.dev.txt ; \
+  fi && \
   rm -rf /tmp && \
   adduser \
   --disabled-password \
